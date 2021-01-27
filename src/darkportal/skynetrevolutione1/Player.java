@@ -102,7 +102,7 @@ class Player {
     public static String bfs(Integer startFrom, Map<Integer, Node> nodes) {
         //everytime we explore and queue the children of a node, we store the current node as root here
         //when we actually visit a node in the queue, we check if it is child of the current node, if not we pop one here to be the new root
-        Queue<Node> roots = new LinkedList<>();
+        Queue<Node> roots = null;
 
         List<Integer> visited = new ArrayList<>();
         Queue<Integer> toVisited = new LinkedList<>();
@@ -132,7 +132,12 @@ class Player {
             }
 
             //exploring phase: record the current node as future root and add its adjacent node to list to be discovered
-            roots.add(cur);
+            if (roots ==  null) {// this is to avoid adding the first root to the list on the first iteration
+                roots = new LinkedList<>();
+            }
+            else {
+                roots.add(cur);
+            }
             List<Node> adjs = cur.getAdjs();
             Collections.sort(adjs); //to ease debug/tracing, i want to visit nodes in a specific order
             for (Node adj : adjs) {
