@@ -113,15 +113,16 @@ class Player {
 
             // Example: 0 1 are the indices of the nodes you wish to sever the link between
             //System.out.println("0 1");
-            System.out.println(bfs(SI, nodes));
+            Node start = nodes.get(SI);
+            System.out.println(bfs(start));
         }
     }
 
-    public static String bfs(Integer startFrom, Map<Integer, Node> nodes) {
-        List<Integer> visited = new ArrayList<>();
+    public static String bfs(Node startFrom) {
+        Set<Node> visited = new HashSet<>();
         Queue<Link> toVisit = new LinkedList<>();
 
-        Node parent = nodes.get(startFrom);
+        Node parent = startFrom;
         toVisit.add(new Link(parent, parent));
 
         while (!toVisit.isEmpty()) {
@@ -131,7 +132,7 @@ class Player {
             Node cur = curLink.getNode();
             System.err.println("Parent: " + parent.getVal() + " Cur: " + cur.getVal());
 
-            visited.add(cur.getVal());
+            visited.add(cur);
             if (cur.isGateway()) {
                 //disconnect the gateway from the last node
                 parent.getAdjs().remove(cur);
@@ -143,11 +144,11 @@ class Player {
             //exploring phase: queue the adjacent nodes of the current node to be discovered
             for (Node adj : cur.getAdjs()) {
                 int adjVal = adj.getVal();
-                if (!visited.contains(adjVal) && !toVisit.stream().anyMatch(link -> link.getNode().getVal() == adjVal)) {
+                if (!visited.contains(adj) && !toVisit.stream().anyMatch(link -> link.getNode().getVal() == adjVal)) {
                     toVisit.add(new Link(adj, cur));
                 }
             }
-            System.err.println("toVisit " + toVisit.stream().map(n -> n.toString()).collect(Collectors.joining(", ")));
+            System.err.println("toVisit " + toVisit.stream().map(link -> link.getNode().getVal().toString()).collect(Collectors.joining(", ")));
         }
         return null;
     }
