@@ -5,6 +5,24 @@ import java.util.stream.Collectors;
 
 class Player {
 
+    public static class Link {
+        private Node node;
+        private Node parent;
+
+        public Link(Node node, Node parent) {
+            this.node = node;
+            this.parent = parent;
+        }
+
+        public Node getNode() {
+            return node;
+        }
+
+        public Node getParent() {
+            return parent;
+        }
+    }
+
     public static class Node implements Comparable<Node>{
         Integer nodeVal;
         List<Node> adjacentNodes = new LinkedList<>();
@@ -100,53 +118,37 @@ class Player {
     }
 
     public static String bfs(Integer startFrom, Map<Integer, Node> nodes) {
-        //everytime we explore and queue the children of a node, we store the current node as root here
-        //when we actually visit a node in the queue, we check if it is child of the current node, if not we pop one here to be the new root
-        Queue<Node> roots = null;
-
         List<Integer> visited = new ArrayList<>();
-        Queue<Integer> toVisited = new LinkedList<>();
+        Queue<Link> toVisited = new LinkedList<>();
 
-        Node root = nodes.get(startFrom);
-        toVisited.add(root.getVal());
+        Node parent = nodes.get(startFrom);
+        toVisited.add(new Link(parent, parent));
 
         while (!toVisited.isEmpty()) {
             //checking phase, open the first node in the list to be explored and see if it is what we are looking for
-            Node cur = nodes.get(toVisited.remove());
-            System.err.println("Root: " + root.getVal() + " Cur: " + cur.getVal());
+            Link curLink = toVisited.remove();
+            parent = curLink.getParent();
+            Node cur = curLink.getNode();
+            System.err.println("Parent: " + parent.getVal() + " Cur: " + cur.getVal());
 
             visited.add(cur.getVal());
             if (cur.isGateway()) {
                 //disconnect the gateway from the last node
-                root.getAdjs().remove(cur);
-                cur.getAdjs().remove(root);
+                parent.getAdjs().remove(cur);
+                cur.getAdjs().remove(parent);
 
-                return root.getVal() + " " + cur.getVal();
-            }
-
-            //before moving on next node, we need to know if we need to update the root
-            Node nextToBeDiscovered = nodes.get(toVisited.peek());
-            if (cur != root && !root.getAdjs().contains(nextToBeDiscovered)) {//the curent root is not connected to the next node to be discovered
-                root = roots.remove();//since we explore nodes in a specific order, the next root must be next in the roots queue
-                System.err.println("Next to be checked: " + nextToBeDiscovered.getVal() + ", setting new root to " + root.getVal());
+                return parent.getVal() + " " + cur.getVal();
             }
 
-            //exploring phase: record the current node as future root and add its adjacent node to list to be discovered
-            if (roots ==  null) {// this is to avoid adding the first root to the list on the first iteration
-                roots = new LinkedList<>();
-            }
-            else {
-                roots.add(cur);
-            }
+            //exploring phase: queue the adjacent nodes of the current node to be discovered
             List<Node> adjs = cur.getAdjs();
             Collections.sort(adjs); //to ease debug/tracing, i want to visit nodes in a specific order
             for (Node adj : adjs) {
                 int adjVal = adj.getVal();
-                if (!visited.contains(adjVal) && !toVisited.contains(adjVal)) {
-                    toVisited.add(adjVal);
+                if (!visited.contains(adjVal) && !toVisited.stream().anyMatch(link -> link.getNode().getVal() == adjVal)) {
+                    toVisited.add(new Link(adj, cur));
                 }
             }
-            System.err.println("Roots: " + roots.stream().map(n -> n.getVal().toString()).collect(Collectors.joining(", ")));
             System.err.println("toVisit " + toVisited.stream().map(n -> n.toString()).collect(Collectors.joining(", ")));
         }
         return null;
