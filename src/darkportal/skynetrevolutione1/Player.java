@@ -141,9 +141,7 @@ class Player {
             }
 
             //exploring phase: queue the adjacent nodes of the current node to be discovered
-            List<Node> adjs = cur.getAdjs();
-            Collections.sort(adjs); //to ease debug/tracing, i want to visit nodes in a specific order
-            for (Node adj : adjs) {
+            for (Node adj : cur.getAdjs()) {
                 int adjVal = adj.getVal();
                 if (!visited.contains(adjVal) && !toVisited.stream().anyMatch(link -> link.getNode().getVal() == adjVal)) {
                     toVisited.add(new Link(adj, cur));
