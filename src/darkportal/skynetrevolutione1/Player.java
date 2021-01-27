@@ -100,6 +100,10 @@ class Player {
     }
 
     public static String bfs(Integer startFrom, Map<Integer, Node> nodes) {
+        //everytime we explore and queue the children of a node, we store the current node as root here
+        //when we actually visit a node in the queue, we check if it is child of the current node, if not we pop one here to be the new root
+        Queue<Node> roots = new LinkedList<>();
+
         List<Integer> visited = new ArrayList<>();
         Queue<Integer> toVisited = new LinkedList<>();
 
@@ -107,7 +111,7 @@ class Player {
         toVisited.add(root.getVal());
 
         while (!toVisited.isEmpty()) {
-            //checking phase: open the first node in the list to be explored and see if it is what we are looking for
+            //checking phase, open the first node in the list to be explored and see if it is what we are looking for
             Node cur = nodes.get(toVisited.remove());
             System.err.println("Root: " + root.getVal() + " Cur: " + cur.getVal());
 
@@ -120,7 +124,15 @@ class Player {
                 return root.getVal() + " " + cur.getVal();
             }
 
-            //exploring phase: add the adjacent nodes of the current node to list to be discovered
+            //before moving on next node, we need to know if we need to update the root
+            Node nextToBeDiscovered = nodes.get(toVisited.peek());
+            if (cur != root && !root.getAdjs().contains(nextToBeDiscovered)) {//the curent root is not connected to the next node to be discovered
+                root = roots.remove();//since we explore nodes in a specific order, the next root must be next in the roots queue
+                System.err.println("Next to be checked: " + nextToBeDiscovered.getVal() + ", setting new root to " + root.getVal());
+            }
+
+            //exploring phase: record the current node as future root and add its adjacent node to list to be discovered
+            roots.add(cur);
             List<Node> adjs = cur.getAdjs();
             Collections.sort(adjs); //to ease debug/tracing, i want to visit nodes in a specific order
             for (Node adj : adjs) {
@@ -129,6 +141,7 @@ class Player {
                     toVisited.add(adjVal);
                 }
             }
+            System.err.println("Roots: " + roots.stream().map(n -> n.getVal().toString()).collect(Collectors.joining(", ")));
             System.err.println("toVisit " + toVisited.stream().map(n -> n.toString()).collect(Collectors.joining(", ")));
         }
         return null;
