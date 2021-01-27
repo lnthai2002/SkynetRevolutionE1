@@ -119,14 +119,14 @@ class Player {
 
     public static String bfs(Integer startFrom, Map<Integer, Node> nodes) {
         List<Integer> visited = new ArrayList<>();
-        Queue<Link> toVisited = new LinkedList<>();
+        Queue<Link> toVisit = new LinkedList<>();
 
         Node parent = nodes.get(startFrom);
-        toVisited.add(new Link(parent, parent));
+        toVisit.add(new Link(parent, parent));
 
-        while (!toVisited.isEmpty()) {
+        while (!toVisit.isEmpty()) {
             //checking phase, open the first node in the list to be explored and see if it is what we are looking for
-            Link curLink = toVisited.remove();
+            Link curLink = toVisit.remove();
             parent = curLink.getParent();
             Node cur = curLink.getNode();
             System.err.println("Parent: " + parent.getVal() + " Cur: " + cur.getVal());
@@ -143,11 +143,11 @@ class Player {
             //exploring phase: queue the adjacent nodes of the current node to be discovered
             for (Node adj : cur.getAdjs()) {
                 int adjVal = adj.getVal();
-                if (!visited.contains(adjVal) && !toVisited.stream().anyMatch(link -> link.getNode().getVal() == adjVal)) {
-                    toVisited.add(new Link(adj, cur));
+                if (!visited.contains(adjVal) && !toVisit.stream().anyMatch(link -> link.getNode().getVal() == adjVal)) {
+                    toVisit.add(new Link(adj, cur));
                 }
             }
-            System.err.println("toVisit " + toVisited.stream().map(n -> n.toString()).collect(Collectors.joining(", ")));
+            System.err.println("toVisit " + toVisit.stream().map(n -> n.toString()).collect(Collectors.joining(", ")));
         }
         return null;
     }
